@@ -125,7 +125,7 @@ class App
         $dispatcher = new EventDispatcher();
         $dispatcher->addSubscriber(new RouterListener($matcher, $request_stack, $context)); // IMPLEMENT: logger?
 
-        $resolver = new ControllerResolver(); //IMPLEMENT logger?
+        $resolver = new ControllerResolver(); //IMPLEMENT lrogger?
 
         $kernel = new HttpKernel($dispatcher, $resolver);
 
