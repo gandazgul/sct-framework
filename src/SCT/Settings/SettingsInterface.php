@@ -1,4 +1,4 @@
-<?php namespace SCT;
+<?php namespace SCT\Settings;
 
 /**
  * Interface SettingsInterface
