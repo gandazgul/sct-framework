@@ -1,7 +1,7 @@
 {
-  "name": "sct/project-template",
+  "name": "sct/framework",
   "description": "Skeleton for other projects",
-  "type": "project",
+  "type": "library",
   "license": "MIT",
   "authors": [
     {

@@ -1,4 +1,4 @@
-<?php namespace Application\Config;
+<?php namespace Application;
 
 use SCT\App;
 

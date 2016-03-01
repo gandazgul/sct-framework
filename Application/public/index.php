@@ -1,6 +1,6 @@
 <?php
 
-use Application\Config\Routes;
+use Application\Routes;
 use SCT\App;
 use Symfony\Component\HttpFoundation\Request;
 
