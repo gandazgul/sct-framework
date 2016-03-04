@@ -1,8 +1,8 @@
 <?php
 
-use Application\Routes;
 use SCT\App;
 use Symfony\Component\HttpFoundation\Request;
+use TestApplication\Routes;
 
 define('ROOT', realpath('../../') . '/');
 define('APPLICATION', realpath('..') . '/');

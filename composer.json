@@ -21,10 +21,10 @@
   "autoload": {
     "psr-0": {
       "SCT\\": "./src",
-      "Application\\": "./"
+      "TestApplication\\": "./"
     },
     "classmap": [
-      "Application/Controllers/"
+      "TestApplication/Controllers/"
     ]
   }
 }
