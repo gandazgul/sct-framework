@@ -33,14 +33,17 @@ class TemplateEngine
 
     /**
      * @param string $view_template_file The name of the template file
-     * @param array $vars
+     * @param array $vars could be null
      *
      * @return mixed
      * @throws \Exception
      */
-    public function render(string $view_template_file, array $vars = [])
+    public function render(string $view_template_file, $vars = [])
     {
-        $this->vars = array_merge($this->vars, $vars);
+        if ($vars)
+        {
+            $this->vars = array_merge($this->vars, $vars);
+        }
 
         if (array_key_exists('view_template_file', $this->vars))
         {
