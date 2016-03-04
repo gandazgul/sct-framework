@@ -1,12 +1,17 @@
 <?php namespace SCT;
 
+use SCT\Settings\AppSettings;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Controller\ControllerResolver;
+use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpKernel\EventListener\RouterListener;
 use Symfony\Component\HttpKernel\HttpKernel;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
@@ -15,16 +20,17 @@ use Symfony\Component\Routing\RouteCollection;
 /**
  * Class App
  *
+ * This is the heart of the framework, gathers the routes and handles the requests
  */
 class App
 {
+    /** @var Controller|callable */
+    protected $controller;
     private $routes;
-    private $response;
 
     public function __construct()
     {
         $this->routes = new RouteCollection();
-        $this->response = new Response();
     }
 
     /**
@@ -114,6 +120,83 @@ class App
         $this->addRoute('DELETE', $url, $controller_spec, $settings);
     }
 
+    /**
+     * This is a listener for KernelEvents::VIEW which will render a view or send JSON depending on the Accept header
+     *
+     * @param GetResponseForControllerResultEvent $event
+     *
+     * @throws SCTException
+     * @throws \Exception
+     */
+    public function render(GetResponseForControllerResultEvent $event)
+    {
+        /** @var Response|array $result */
+        $result = $event->getControllerResult();
+
+        //if we have a response then just set that and return
+        if ($result instanceof Response)
+        {
+            $event->setResponse($result);
+
+            return;
+        }
+
+        //otherwise lets render a response
+        $request = $event->getRequest();
+        $response = new Response();
+
+        $acceptableContentType = $request->getAcceptableContentTypes();
+
+        if (in_array('text/html', $acceptableContentType))
+        {
+            $template = null;
+            $response->headers->set('Content-type', 'text/html', true);
+
+            //if controller action didn't return the template then try calling getTemplate
+            if ($this->controller instanceof Controller)
+            {
+                $template = $this->controller->getTemplate();
+            }
+
+            //if we still dont have a template throw exception
+            if (!$template)
+            {
+                throw new SCTException("Browser requested html but controller didn't specify a template.");
+            }
+
+            $engine = new TemplateEngine(AppSettings::$view_folder);
+            $response->setContent($engine->render($template, $result));
+        }
+        else if (in_array('application/json', $acceptableContentType))
+        {
+            $response = new JsonResponse($result);
+        }
+
+        $event->setResponse($response);
+    }
+
+    /**
+     * KernelEvents::CONTROLLER listener, used to get the controller instance
+     *
+     * @param FilterControllerEvent $event
+     */
+    public function onKernelController(FilterControllerEvent $event)
+    {
+        $this->controller = $event->getController();
+
+        if (is_array($this->controller))
+        {
+            $this->controller = $this->controller[0];
+        }
+    }
+
+    /**
+     * Main app dispatcher
+     *
+     * @param Request $request
+     *
+     * @throws \Exception
+     */
     public function dispatch(Request $request)
     {
         $context = new RequestContext();
@@ -123,12 +206,18 @@ class App
         $request_stack = new RequestStack();
 
         $dispatcher = new EventDispatcher();
+        //router
         $dispatcher->addSubscriber(new RouterListener($matcher, $request_stack, $context)); // IMPLEMENT: logger?
-
+        //Get the controller
+        $dispatcher->addListener(KernelEvents::CONTROLLER, [$this, 'onKernelController']);
+        //non-response results
+        $dispatcher->addListener(KernelEvents::VIEW, [$this, 'render']);
+        
         $resolver = new ControllerResolver(); //IMPLEMENT lrogger?
-
         $kernel = new HttpKernel($dispatcher, $resolver);
 
-        $kernel->handle($request)->send();
+        $response = $kernel->handle($request);
+
+        $response->send();
     }
 }

@@ -11,8 +11,8 @@ class Routes
 {
     public static function init(App $app)
     {
-        $app->get('/', 'HomeController::indexAction');
-        $app->get('/hello/{name}', 'HomeController::exampleAction');
+        $app->get('/', 'HomeController::index');
+        $app->get('/hello/{name}', 'HomeController::example');
 
         //All other routes
     }
