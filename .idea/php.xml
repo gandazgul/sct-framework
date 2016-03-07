@@ -6,4 +6,5 @@
       <PhpUnitSettings />
     </phpunit_settings>
   </component>
+  <component name="SmartyConfiguration" use_smarty3_whitespaces_policy="false" />
 </project>

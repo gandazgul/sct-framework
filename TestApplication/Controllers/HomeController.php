@@ -18,7 +18,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $this->template = 'welcome.phtml';
+        $this->template = 'welcome.smarty';
 
         return [
             'message' => 'This message came from the controller.',

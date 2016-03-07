@@ -1,3 +1,3 @@
 <?php
 
-\SCT\Settings::init('local');
+\SCT\Settings\Settings::init('local');

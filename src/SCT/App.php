@@ -1,5 +1,7 @@
 <?php namespace SCT;
 
+use SCT\Exceptions\SCTException;
+use SCT\Interfaces\TemplateEngineInterface;
 use SCT\Settings\AppSettings;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -164,7 +166,9 @@ class App
                 throw new SCTException("Browser requested html but controller didn't specify a template.");
             }
 
-            $engine = new TemplateEngine(AppSettings::$view_folder);
+            $engineClassName = AppSettings::$view_engine;
+            /** @var TemplateEngineInterface $engine */
+            $engine = new $engineClassName(AppSettings::$view_folder);
             $response->setContent($engine->render($template, $result));
         }
         else if (in_array('application/json', $acceptableContentType))

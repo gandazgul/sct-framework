@@ -1,5 +1,7 @@
 <?php namespace SCT\Settings;
 
+use SCT\Interfaces\SettingsInterface;
+
 /**
  * Class DBSettings
  * Database settings

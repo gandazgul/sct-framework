@@ -1,5 +1,7 @@
 <?php namespace SCT\Settings;
 
+use SCT\Interfaces\SettingsInterface;
+
 /**
  * Class Settings
  * Settings initializer
@@ -36,7 +38,7 @@ class Settings
 
     public static function init($environment)
     {
-        $base_dir = ROOT . "/Settings";
+        $base_dir = APPLICATION . "Settings";
         $settings_files = self::get_php_file_paths($base_dir);
 
         foreach ($settings_files as $file)
@@ -49,7 +51,10 @@ class Settings
             /** @var SettingsInterface $ns_path */
             $ns_path = str_replace("/", "\\", $rel_path);
             $oReflectionClass = new \ReflectionClass($ns_path);
-            if (!$oReflectionClass->isAbstract() && $oReflectionClass->isSubclassOf('\\Settings\\SettingsInterface'))
+            if (!$oReflectionClass->isAbstract() && $oReflectionClass->isSubclassOf(
+                    '\\SCT\\Interfaces\\SettingsInterface'
+                )
+            )
             {
                 $ns_path::init($environment);
             }
