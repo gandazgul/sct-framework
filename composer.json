@@ -16,7 +16,9 @@
     "illuminate/filesystem": "^5.2",
     "illuminate/console": "^5.2",
     "symfony/http-kernel": "^3.0",
-    "symfony/routing": "^3.0",
+    "symfony/routing": "^3.0"
+  },
+  "requireDev": {
     "smarty/smarty": "^3.1"
   },
   "autoload": {
