@@ -1,0 +1,87 @@
+# Set some options.
+Options -Indexes
+Options +FollowSymLinks
+
+# Customized error messages.
+ErrorDocument 503 /maintenance/index.html
+
+# Set the default handler.
+DirectoryIndex index.php
+
+# Override PHP settings
+php_flag ignore_user_abort on
+php_flag magic_quotes_gpc  off
+php_flag register_globals  off
+
+# hash_bits_per_character default is 5.
+# Higher values create shorter session ids.
+# With hash_function 1, 5 bits: 32 chars, 6 bits: 27 chars
+php_value session.hash_bits_per_character  6
+php_flag session.auto_start  off
+php_flag session.cookie_httponly  on
+php_value session.hash_function 1
+
+# add mime types for fonts
+# see: http://linz.id.au/2011/02/08/setting-http-headers-on-css-fonts-for-great-justice-and-performance
+# except for woff, which has a new mimetype
+AddType application/vnd.ms-fontobject .eot
+AddType font/ttf                      .ttf
+AddType font/opentype                 .otf
+AddType image/svg+xml                 .svg
+AddType application/font-woff         .woff
+
+# Make static resources cacheable, html not cached (can be overridden by php if you set
+# both the Cache-Control and Expires headers)
+<IfModule mod_expires.c>
+    # ExpiresByType sets both the (old) Expires header and the new cache-control header
+    ExpiresActive On
+    ExpiresByType text/html "now"
+    ExpiresByType text/javascript "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+
+    # we use force_unique on file uploads, so new versions of the file have -1, -2, etc
+    # for other stuff, if you need to force a reload, append a version get parameter
+    ExpiresByType image/jpeg "access plus 1 week"
+    ExpiresByType image/gif "access plus 1 week"
+    ExpiresByType image/png "access plus 1 week"
+    ExpiresByType image/webp "access plus 1 week"
+
+    # Set Cache-Control public for things that don't need to be confidential
+    SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|webp|woff|css|js)$ static_content
+    Header append Cache-Control public env=static_content
+
+    # 500 errors aren't cacheable
+    Header set Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0" "expr=%{REQUEST_STATUS} -ge 500 && %{REQUEST_STATUS} -lt 600"
+</IfModule>
+
+# Various rewrite rules.
+RewriteEngine on
+
+# Block access to hidden files that can reveal other files/info about the system
+# git
+RewriteRule \.git/ - [forbidden,last]
+RewriteRule \.gitignore$ - [forbidden,last]
+
+# Macs create these
+RewriteRule __MACOSX$ - [nocase,forbidden,last]
+RewriteRule \.DS_Store$ - [nocase,forbidden,last]
+RewriteRule \.FBCIndex$ - [nocase,forbidden,last]
+# Windows creates these
+RewriteRule Thumbs\.db$ - [nocase,forbidden,last]
+
+# javascript
+RewriteCond %{REQUEST_URI} ^/v-.*?/
+RewriteRule ^v-.*?/(.*)$ /$1 [last]
+
+# Remove trailing slashes ????
+RewriteCond %{REQUEST_METHOD} =GET [nocase]
+RewriteRule ^(.*)/$ /$1 [last,redirect=301]
+
+# If the request is not for an existing file or directory ...
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+# forward the request to index.php
+RewriteRule ^ index.php [last]
