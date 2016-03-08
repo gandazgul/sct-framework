@@ -12,6 +12,8 @@ use Symfony\Component\HttpKernel\Controller\ControllerResolver;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpKernel\EventListener\RouterListener;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
@@ -151,25 +153,15 @@ class App
 
         if (in_array('text/html', $acceptableContentType))
         {
-            $template = null;
-            $response->headers->set('Content-type', 'text/html', true);
+            $template = $this->controller->getTemplate();
 
-            //if controller action didn't return the template then try calling getTemplate
-            if ($this->controller instanceof Controller)
-            {
-                $template = $this->controller->getTemplate();
-            }
-
-            //if we still dont have a template throw exception
+            //if we don't have a template throw exception
             if (!$template)
             {
                 throw new SCTException("Browser requested html but controller didn't specify a template.");
             }
 
-            $engineClassName = AppSettings::$view_engine;
-            /** @var TemplateEngineInterface $engine */
-            $engine = new $engineClassName(AppSettings::$view_folder);
-            $response->setContent($engine->render($template, $result));
+            $response = $this->renderHTML($template, $result);
         }
         else if (in_array('application/json', $acceptableContentType))
         {
@@ -220,8 +212,54 @@ class App
         $resolver = new ControllerResolver(); //IMPLEMENT lrogger?
         $kernel = new HttpKernel($dispatcher, $resolver);
 
-        $response = $kernel->handle($request);
+        //create default response
+        $response = new Response();
+
+        try // to get a response from controller
+        {
+            $response = $kernel->handle($request);
+        }
+        catch (HttpException $e)
+        {
+            if ($e instanceof NotFoundHttpException)
+            {
+                //page not found
+                $response = $this->getPageNotFoundResponse();
+            }
+        }
 
         $response->send();
+    }
+
+    /**
+     * Crafts an HTML 404 Not found response
+     */
+    public function getPageNotFoundResponse()
+    {
+        $response = $this->renderHTML('errors/404.smarty');
+        $response->setStatusCode(Response::HTTP_NOT_FOUND, "Page not found");
+
+        return $response;
+    }
+
+    /**
+     * Renders a template with the template engine, use $data to pass in variables that will be bound to the template
+     *
+     * @param string $template The name of the template to render
+     * @param array $data Optional, empty by default
+     *
+     * @return Response
+     */
+    protected function renderHTML(string $template, array $data = [])
+    {
+        $response = new Response();
+        $response->headers->set('Content-type', 'text/html', true);
+
+        $engineClassName = AppSettings::$view_engine;
+        /** @var TemplateEngineInterface $engine */
+        $engine = new $engineClassName(AppSettings::$view_folder);
+        $response->setContent($engine->render($template, $data));
+
+        return $response;
     }
 }
