@@ -246,11 +246,11 @@ class App
      * Renders a template with the template engine, use $data to pass in variables that will be bound to the template
      *
      * @param string $template The name of the template to render
-     * @param array $data Optional, empty by default
+     * @param array|null $data Optional, empty by default
      *
      * @return Response
      */
-    protected function renderHTML(string $template, array $data = [])
+    protected function renderHTML(string $template, $data = [])
     {
         $response = new Response();
         $response->headers->set('Content-type', 'text/html', true);
