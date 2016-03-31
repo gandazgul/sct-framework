@@ -6,6 +6,7 @@ use TestApplication\Routes;
 
 define('ROOT', realpath('../../') . '/');
 define('APPLICATION', realpath('..') . '/');
+define('STORAGE', APPLICATION . 'storage/');
 
 require_once ROOT . "vendor/autoload.php";
 require_once ROOT . "settings.php";
