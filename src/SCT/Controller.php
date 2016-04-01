@@ -16,5 +16,10 @@ class Controller
         return $this->template;
     }
 
-    
+    public function getDefaultData()
+    {
+        return [];
+    }
+
+
 }
