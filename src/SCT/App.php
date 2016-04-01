@@ -162,7 +162,9 @@ class App
                 throw new SCTException("Browser requested html but controller didn't specify a template.");
             }
 
-            $response = $this->renderHTML($template, $result);
+            $defaultData = $this->controller->getDefaultData();
+
+            $response = $this->renderHTML($template, array_merge($defaultData, $result));
         }
         else if (in_array('application/json', $acceptableContentType))
         {
@@ -209,7 +211,7 @@ class App
         $dispatcher->addListener(KernelEvents::CONTROLLER, [$this, 'onKernelController']);
         //non-response results
         $dispatcher->addListener(KernelEvents::VIEW, [$this, 'render']);
-        
+
         $resolver = new ControllerResolver(); //IMPLEMENT lrogger?
         $kernel = new HttpKernel($dispatcher, $resolver);
 
@@ -219,8 +221,7 @@ class App
         try // to get a response from controller
         {
             $response = $kernel->handle($request);
-        }
-        catch (HttpException $e)
+        } catch (HttpException $e)
         {
             if ($e instanceof NotFoundHttpException)
             {
