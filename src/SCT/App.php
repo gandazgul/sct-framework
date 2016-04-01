@@ -163,8 +163,12 @@ class App
             }
 
             $defaultData = $this->controller->getDefaultData();
+            if (is_array($result))
+            {
+                $defaultData = array_merge($defaultData, $result);
+            }
 
-            $response = $this->renderHTML($template, array_merge($defaultData, $result));
+            $response = $this->renderHTML($template, $defaultData);
         }
         else if (in_array('application/json', $acceptableContentType))
         {
