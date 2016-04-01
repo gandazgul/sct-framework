@@ -276,7 +276,7 @@ class App
      *
      * @return RedirectResponse
      */
-    public function redirect(Request $request, $where = null, $http_code = 301)
+    public static function redirect(Request $request, $where = null, $http_code = 301)
     {
         if (!$where)
         {
