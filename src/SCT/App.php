@@ -5,6 +5,7 @@ use SCT\Interfaces\TemplateEngineInterface;
 use SCT\Settings\AppSettings;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -259,6 +260,54 @@ class App
         /** @var TemplateEngineInterface $engine */
         $engine = new $engineClassName(AppSettings::$view_folder);
         $response->setContent($engine->render($template, $data));
+
+        return $response;
+    }
+
+    /**
+     * @param Request $request The request object
+     * @param string|null $where The destination url, if null will get it from the request
+     * @param int $http_code The http code to use, 301 by default
+     *
+     * @return RedirectResponse
+     */
+    public function redirect(Request $request, $where = null, integer $http_code = 301)
+    {
+        if (!$where)
+        {
+            $where = $request->getRequestUri();
+        }
+
+        // location header must be a full URL
+        if (strtolower(substr($where, 0, 4)) != 'http')
+        {
+            if (substr($where, 0, 2) !== '//')
+            {
+                $where = '//' . $request->getHost() . $where;
+            }
+
+            if ($request->getScheme() == 'https')
+            {
+                $where = "https:$where";
+            }
+            else
+            {
+                $where = "http:$where";
+            }
+        }
+
+        $where_orig = $where; //filter_var will set the url to false if not valid. Keep the original.
+        $where = filter_var($where, FILTER_VALIDATE_URL);
+        if (!$where)
+        {
+            trigger_error("Destination url is not a valid url: $where_orig", E_USER_NOTICE);
+            $response = new Response();
+            $response->setStatusCode(500);
+
+            return $response;
+        }
+
+        $response = new RedirectResponse($where, $http_code);
 
         return $response;
     }
