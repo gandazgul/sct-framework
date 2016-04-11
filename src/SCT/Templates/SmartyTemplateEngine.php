@@ -1,6 +1,7 @@
 <?php namespace SCT\Templates;
 
 use SCT\Exceptions\TemplateEngineException;
+use SCT\Settings\Settings;
 
 /**
  * Class PHPTemplateEngine
@@ -24,6 +25,11 @@ class SmartyTemplateEngine extends TemplateEngine
         $this->smarty->setCacheDir(APPLICATION . 'storage/cache/');
         $this->smarty->setCaching(true);
         $this->smarty->auto_literal = false;
+
+        Settings::settings_map(function ($ns_path)
+        {
+            $this->smarty->registerClass(class_basename($ns_path), $ns_path);
+        });
     }
 
     /**
