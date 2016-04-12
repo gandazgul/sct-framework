@@ -113,6 +113,20 @@ class App
     }
 
     /**
+     * Adds a PATCH route
+     *
+     * @see addRoute
+     *
+     * @param string $url
+     * @param string $controller_spec
+     * @param array $settings
+     */
+    public function patch(string $url, string $controller_spec, array $settings = [])
+    {
+        $this->addRoute('PATCH', $url, $controller_spec, $settings);
+    }
+
+    /**
      * Adds a DELETE route
      * @see addRoute
      *
