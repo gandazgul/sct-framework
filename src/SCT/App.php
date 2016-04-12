@@ -70,7 +70,7 @@ class App
 
         $route = new Route($url, $defaults, $requirements, [], '', [], $methods);
 
-        $this->routes->add($url, $route);
+        $this->routes->add(implode(':', $methods) . "-$url", $route);
     }
 
     /**
