@@ -1,6 +1,7 @@
 <?php namespace SCT;
 
 use SCT\Exceptions\SCTException;
+use SCT\Exceptions\UnauthorizedAccessException;
 use SCT\Interfaces\TemplateEngineInterface;
 use SCT\Settings\AppSettings;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -205,6 +206,9 @@ class App
         {
             $this->controller = $this->controller[0];
         }
+
+        //check for security
+        $this->checkSecurity($this->controller, $event->getRequest());
     }
 
     /**
@@ -329,5 +333,21 @@ class App
         $response = new RedirectResponse($where, $http_code);
 
         return $response;
+    }
+
+    /**
+     * Calls controller->shouldRequestContinue() and throws a AuthorizedAccessException if the check fails
+     *
+     * @param Controller $controller
+     * @param Request $request
+     *
+     * @throws UnauthorizedAccessException
+     */
+    private function checkSecurity(Controller $controller, Request $request)
+    {
+        if ($controller->shouldRequestContinue($request) === false)
+        {
+            throw new UnauthorizedAccessException();
+        }
     }
 }

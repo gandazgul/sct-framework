@@ -1,5 +1,7 @@
 <?php namespace SCT;
 
+use Symfony\Component\HttpFoundation\Request;
+
 /**
  * Class Controller
  *
@@ -21,5 +23,15 @@ class Controller
         return [];
     }
 
-
+    /**
+     * Check for security like session or API tokens, etc
+     *
+     * @param Request $request
+     *
+     * @return bool
+     */
+    public function shouldRequestContinue(Request $request)
+    {
+        return true;
+    }
 }
