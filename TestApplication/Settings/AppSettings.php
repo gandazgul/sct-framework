@@ -15,8 +15,14 @@ class AppSettings extends \SCT\Settings\AppSettings
         switch ($environment)
         {
             case 'local':
-                static::$view_engine = '\\SCT\\Templates\\SmartyTemplateEngine';
+                static::$smarty_compile_check = true;
                 break;
+            case 'live':
+                static::$smarty_compile_check = false;
+                break;
+            default:
+                static::$view_engine = '\\SCT\\Templates\\SmartyTemplateEngine';
+                
         }
     }
 }

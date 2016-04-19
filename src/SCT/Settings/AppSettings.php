@@ -17,6 +17,8 @@ class AppSettings implements SettingsInterface
     public static $view_folder = APPLICATION . 'views';
     /** @var TemplateEngineInterface A template engine class */
     public static $view_engine;
+    /** @var bool the smarty setting. @see http://www.smarty.net/docsv2/en/caching.tpl */
+    public static $smarty_compile_check;
 
     public static function init($environment) { }
 }

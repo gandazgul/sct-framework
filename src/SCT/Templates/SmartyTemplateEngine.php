@@ -2,6 +2,7 @@
 
 use SCT\Exceptions\TemplateEngineException;
 use SCT\Settings\Settings;
+use TestApplication\Settings\AppSettings;
 
 /**
  * Class PHPTemplateEngine
@@ -24,6 +25,8 @@ class SmartyTemplateEngine extends TemplateEngine
         $this->smarty->setConfigDir(APPLICATION . 'storage/configs/');
         $this->smarty->setCacheDir(APPLICATION . 'storage/cache/');
         $this->smarty->setCaching(true);
+        $this->smarty->cache_lifetime = 24 * 60 * 60; //1 day
+        $this->smarty->compile_check = AppSettings::$smarty_compile_check;
         $this->smarty->auto_literal = false;
 
         Settings::settings_map(function ($ns_path)
